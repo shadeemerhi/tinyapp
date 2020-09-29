@@ -14,7 +14,6 @@ const urlDatabase = {
 };
 
 app.set('view engine', 'ejs');
-// morgan(':method :url :status :response-time ms - :res[content-length]');
 
 app.get("/", (req, res) => {
   res.send("Hello!");
