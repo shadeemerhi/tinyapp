@@ -30,7 +30,6 @@ app.get('/urls', (req, res) => {
     username: req.cookies['username'],
     urls: urlDatabase
   };
-  console.log(req.cookies);
   res.render('urls_index', templateVars);
 });
 
@@ -79,6 +78,11 @@ app.post('/login', (req, res) => {
   res.cookie('username', req.body.username);
   res.redirect('/urls');
 });
+
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+})
 
 function urlChecker (url) {
   if (!url.includes('http://') && !url.includes('www')) {
