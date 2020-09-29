@@ -39,11 +39,13 @@ app.get('/urls/:shortURL', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
-  const longURL = req.body.longURL;
-  // if (! longURL.includes('http://')) {
-
-  // }
-  urlDatabase[shortURL] = req.body.longURL;
+  let longURL = req.body.longURL;
+  if (!longURL.includes('http://') && !longURL.includes('www')) {
+    longURL = `http://www.${longURL}`;
+  } else if (! longURL.includes('http://') && longURL.includes('www')) {
+    longURL = `http://${longURL}`;
+  }
+  urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
   
 });
