@@ -39,15 +39,9 @@ app.get('/urls/:shortURL', (req, res) => {
 
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
-  let longURL = req.body.longURL;
-  if (!longURL.includes('http://') && !longURL.includes('www')) {
-    longURL = `http://www.${longURL}`;
-  } else if (! longURL.includes('http://') && longURL.includes('www')) {
-    longURL = `http://${longURL}`;
-  }
+  let longURL = urlChecker(req.body.longURL);
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
-  
 });
 
 app.get('/u/:shortURL', (req, res) => {
@@ -61,11 +55,24 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+app.post('/urls/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  let longURL = urlChecker(req.body.longURL);
+  urlDatabase[shortURL] = longURL;
+  res.redirect('/urls');
+});
+
+function urlChecker (url) {
+  if (!url.includes('http://') && !url.includes('www')) {
+    url = `http://www.${url}`;
+  } else if (! url.includes('http://') && url.includes('www')) {
+    url = `http://${url}`;
+  }
+  return url;
+}
 
 function generateRandomString() {
-
   const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
   let result = '';
   let count = 0;
   while (count < 6) {
