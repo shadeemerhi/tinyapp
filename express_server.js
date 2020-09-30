@@ -44,6 +44,15 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+app.get('/login', (req, res) => {
+  const templateVars = {
+    user: users[req.cookies['user_id']],
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL]
+  };
+  res.render('login', templateVars);
+});
+
 app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   let longURL = urlChecker(req.body.longURL);
@@ -89,7 +98,6 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
-
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
