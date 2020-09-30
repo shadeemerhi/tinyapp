@@ -29,6 +29,12 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
+  // console.log(req.cookies);
+
+  // Checking if a user is logged in - a populated cookie would exist
+  if (! req.cookies['user_id']) {
+    res.redirect('/login');
+  }
   const templateVars = {
     user: users[req.cookies['user_id']]
   }
@@ -93,7 +99,8 @@ app.post('/login', (req, res) => {
       return;
     }
   } else {
-    res.status(403).send('An account with that email does not exist'); // should redirect to register
+    res.status(403).send('An account with that email does not exist');
+    // res.redirect('/register');
     return;
   }
 });
