@@ -13,35 +13,45 @@
 </header>
 <body>
   <main style="margin: 1em;">
-    <h3>My URLs</h3>
-    <table class="table">
-      <thead>
-        <tr>
-          <th scope="col">Short URL</th>
-          <th scope="col">Long URL</th>
-          <th scope="col">Edit</th>
-          <th scope="col">Delete</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% for(let url in urls) { %>
+    <% if (user) { %>
+      <h3>My URLs</h3>
+      <table class="table">
+        <thead>
           <tr>
-            <td><a href="/urls/<%=url%>"><%= url %></a></td>
-            <td><%= urls[url].longURL %></td>
-            <td>
-              <form action="/urls/<%=url%>" method="GET" >
-                <button type="submit" class="btn btn-outline-primary">Edit</button>
-              </form>
-            </td>
-            <td>
-              <form action="/urls/<%=url%>/delete" method="POST" >
-                <button type="submit" class="btn btn-outline-danger">Delete</button>
-              </form>
-            </td>
+            <th scope="col">Short URL</th>
+            <th scope="col">Long URL</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Delete</th>
           </tr>
-        <% } %>
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          <% for(let url in urls) { %>
+            <tr>
+              <td><a href="/urls/<%=url%>"><%= url %></a></td>
+              <td><%= urls[url].longURL %></td>
+              <td>
+                <form action="/urls/<%=url%>" method="GET" >
+                  <button type="submit" class="btn btn-outline-primary">Edit</button>
+                </form>
+              </td>
+              <td>
+                <form action="/urls/<%=url%>/delete" method="POST" >
+                  <button type="submit" class="btn btn-outline-danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    <% } else { %>
+      <div class="container text-center" style="padding-top:2em">
+        <div class="row text-center">
+          <div class="col-12">
+            <h2 style="padding-bottom:1em;">Welcome! Please <a href="/login">Login</a> or <a href="/register">Register</a></h2>
+          </div>
+        </div>
+      </div>
+      <% } %>
   </main>
   <!-- Bootstrap JS -->
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
