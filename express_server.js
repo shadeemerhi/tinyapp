@@ -101,12 +101,17 @@ app.post('/register', (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
+  console.log(email);
   // Checking if registration email or password is empty
-  if (email.length === 0 || password.length === 0) {
-    res.status(400).send('Email or password not entered');
+  // if (email.length === 0 || password.length === 0) {
+  //   res.status(400).send('Email or password not entered');
+  // }
+  
+  if (checkEmptyFields(email, password)) {
+      res.status(400).send('Email or password not entered');
   }
   // Checking if the email, and therefore user, already exist
-  if (userExists()) {
+  if (userExists(email)) {
     res.status(400).send('Existing account with that email');
   }
   const newUser = {
@@ -115,15 +120,24 @@ app.post('/register', (req, res) => {
     password
   };
   users[userID] = newUser;
+  console.log(users);
   res.cookie('user_id', userID);
   res.redirect('/urls');
 });
 
 function userExists (email) {
   for (const user in users) {
-    if (user.email === email) {
+    console.log('USER IN LOOP', user.email);
+    if (users[user].email === email) {
       return true;
     }
+  }
+  return false;
+}
+
+function checkEmptyFields (email, password) {
+  if (!email || !password) {
+    return true;
   }
   return false;
 }
