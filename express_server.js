@@ -22,9 +22,12 @@ app.listen(PORT, () => {
 });
 
 app.get('/urls', (req, res) => {
+
+  // Might need if statement to check if req.cookies['user_id'] is defined?
+  const userURLS = urlsForUser(req.cookies['user_id']);
   let templateVars = {
     user: users[req.cookies['user_id']],
-    urls: urlDatabase
+    urls: userURLS
   };
   res.render('urls_index', templateVars);
 });
@@ -147,7 +150,17 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-function userByEmail (email) {
+function urlsForUser(id) {
+  let userURLS = {};
+  for (const url in urlDatabase) {
+    if (urlDatabase[url].userID === id) {
+      userURLS[url] = urlDatabase[url];
+    }
+  }
+  return userURLS;
+}
+
+function userByEmail(email) {
   for (const user in users) {
     if (users[user].email === email) {
       return user;
@@ -156,14 +169,14 @@ function userByEmail (email) {
   return false;
 }
 
-function checkEmptyFields (email, password) {
+function checkEmptyFields(email, password) {
   if (!email || !password) {
     return true;
   }
   return false;
 }
 
-function urlChecker (url) {
+function urlChecker(url) {
   if (!url.includes('http://') && !url.includes('www')) {
     url = `http://www.${url}`;
   } else if (! url.includes('http://') && url.includes('www')) {
