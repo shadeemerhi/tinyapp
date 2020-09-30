@@ -9,14 +9,14 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </ul>
-      <% if (!username) { %>
+      <% if (!user) { %>
         <form class="form-inline my-2 my-lg-0" action="/login" method="POST">
           <input class="form-control" type="text" name="username" placeholder="Enter Username" style="width: 300px; margin: 0.5em">
           <button type="submit" class="btn btn-dark">Login</button>
         </form>
       <% } else { %>
         <form class="form-inline my-2 my-lg-0" action="/logout" method="POST">
-          <li class="nav-item nav-link" href=""> Logged In As: <%=username%></li>
+          <li class="nav-item nav-link" href=""> Logged In As: <%=user.email%></li>
           <button type="submit" class="btn btn-outline-dark">Logout</button>
         </form>
       <% } %>
