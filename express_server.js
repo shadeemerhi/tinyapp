@@ -90,7 +90,9 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.post('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   let longURL = urlChecker(req.body.longURL);
-  urlDatabase[shortURL].longURL = longURL;
+  if (req.cookies['user_id']) {
+    urlDatabase[shortURL].longURL = longURL;
+  };
   res.redirect('/urls');
 });
 
