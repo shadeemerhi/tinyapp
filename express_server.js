@@ -79,9 +79,23 @@ app.post('/urls/:shortURL', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  console.log(req.body);
-  res.cookie('user_id', req.body.email);
-  res.redirect('/urls');
+  const email = req.body.email;
+  const password = req.body.password;
+  let userID = userByEmail(email);
+  // Checks if the user exists
+  if (userID) {
+    // If the user was found, checking if the provided password is correct
+    if (users[userID].password === password) {
+      res.cookie('user_id', userID);
+      res.redirect('/urls');
+    } else { // User with that email was not found
+      res.status(403).send('Incorrect Password');
+      return;
+    }
+  } else {
+    res.status(403).send('An account with that email does not exist'); // should redirect to register
+    return;
+  }
 });
 
 app.post('/logout', (req, res) => {
@@ -101,18 +115,15 @@ app.post('/register', (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  console.log(email);
   // Checking if registration email or password is empty
-  // if (email.length === 0 || password.length === 0) {
-  //   res.status(400).send('Email or password not entered');
-  // }
-  
   if (checkEmptyFields(email, password)) {
       res.status(400).send('Email or password not entered');
+      return;
   }
-  // Checking if the email, and therefore user, already exist
-  if (userExists(email)) {
+  // Checking if the email, and therefore user, already exists
+  if (userByEmail(email)) {
     res.status(400).send('Existing account with that email');
+    return;
   }
   const newUser = {
     id: userID,
@@ -125,11 +136,10 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-function userExists (email) {
+function userByEmail (email) {
   for (const user in users) {
-    console.log('USER IN LOOP', user.email);
     if (users[user].email === email) {
-      return true;
+      return user;
     }
   }
   return false;
