@@ -16,10 +16,6 @@ const users = {};
 
 app.set('view engine', 'ejs');
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
@@ -93,16 +89,36 @@ app.get('/register', (req, res) => {
 });
 
 app.post('/register', (req, res) => {
+
   const userID = generateRandomString();
+  const email = req.body.email;
+  const password = req.body.password;
+  // Checking if registration email or password is empty
+  if (email.length === 0 || password.length === 0) {
+    res.status(400).send('Email or password not entered');
+  }
+  // Checking if the email, and therefore user, already exist
+  if (userExists()) {
+    res.status(400).send('Existing account with that email');
+  }
   const newUser = {
     id: userID,
-    email: req.body.email,
-    password: req.body.password
+    email,
+    password
   };
   users[userID] = newUser;
   res.cookie('user_id', userID);
   res.redirect('/urls');
 });
+
+function userExists (email) {
+  for (const user in users) {
+    if (user.email === email) {
+      return true;
+    }
+  }
+  return false;
+}
 
 function urlChecker (url) {
   if (!url.includes('http://') && !url.includes('www')) {
