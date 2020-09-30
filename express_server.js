@@ -7,11 +7,6 @@ const cookieParser = require('cookie-parser');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
 const urlDatabase = {};
 const users = {};
 
@@ -22,8 +17,6 @@ app.listen(PORT, () => {
 });
 
 app.get('/urls', (req, res) => {
-
-  // Might need if statement to check if req.cookies['user_id'] is defined?
   const userURLS = urlsForUser(req.cookies['user_id']);
   let templateVars = {
     user: users[req.cookies['user_id']],
@@ -33,9 +26,6 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  // console.log(req.cookies);
-
-  // Checking if a user is logged in - a populated cookie would exist
   if (! req.cookies['user_id']) {
     res.redirect('/login');
   }
@@ -69,8 +59,7 @@ app.post('/urls', (req, res) => {
   urlDatabase[shortURL] = {
     longURL,
     userID: req.cookies['user_id']
-  }
-  console.log(urlDatabase);
+  };
   res.redirect(`/urls/${shortURL}`);
 });
 
@@ -100,19 +89,16 @@ app.post('/login', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
   let userID = userByEmail(email);
-  // Checks if the user exists
   if (userID) {
-    // If the user was found, checking if the provided password is correct
     if (users[userID].password === password) {
       res.cookie('user_id', userID);
       res.redirect('/urls');
-    } else { // User with that email was not found
+    } else {
       res.status(403).send('Incorrect Password');
       return;
     }
   } else {
     res.status(403).send('An account with that email does not exist');
-    // res.redirect('/register');
     return;
   }
 });
@@ -134,12 +120,10 @@ app.post('/register', (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = req.body.password;
-  // Checking if registration email or password is empty
   if (checkEmptyFields(email, password)) {
       res.status(400).send('Email or password not entered');
       return;
   }
-  // Checking if the email, and therefore user, already exists
   if (userByEmail(email)) {
     res.status(400).send('Existing account with that email');
     return;
