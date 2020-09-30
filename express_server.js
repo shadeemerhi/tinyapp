@@ -21,7 +21,6 @@ app.listen(PORT, () => {
 });
 
 app.get('/urls', (req, res) => {
-
   let templateVars = {
     user: users[req.cookies['user_id']],
     urls: urlDatabase
@@ -71,7 +70,8 @@ app.post('/urls/:shortURL', (req, res) => {
 });
 
 app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
+  console.log(req.body);
+  res.cookie('user_id', req.body.email);
   res.redirect('/urls');
 });
 
