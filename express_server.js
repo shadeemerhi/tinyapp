@@ -2,17 +2,18 @@ const express = require("express");
 const dotenv = require('dotenv');
 dotenv.config();
 const app = express();
+const { getUserByEmail } = require('./helpers');
+
+// Middleware
 const bodyParser = require("body-parser");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
 let myKey = process.env.myKey;
-
 app.use(cookieSession({
   name: 'session',
   keys: [myKey],
 }));
-
 app.set('view engine', 'ejs');
 
 const PORT = 8080;
@@ -20,6 +21,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+// Global database objects
 const urlDatabase = {};
 const users = {};
 
@@ -38,7 +40,7 @@ app.get('/urls/new', (req, res) => {
   }
   const templateVars = {
     user: users[req.session.user_id]
-  }
+  };
   res.render('urls_new', templateVars);
 });
 
@@ -79,7 +81,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
   if (req.session.user_id) {
     delete urlDatabase[shortURL];
-  };
+  }
   res.redirect('/urls');
 });
 
@@ -88,14 +90,14 @@ app.post('/urls/:shortURL', (req, res) => {
   let longURL = urlChecker(req.body.longURL);
   if (req.session.user_id) {
     urlDatabase[shortURL].longURL = longURL;
-  };
+  }
   res.redirect('/urls');
 });
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const inputPassword = req.body.password;
-  let userID = userByEmail(email, users);
+  let userID = getUserByEmail(email, users);
   if (userID) {
     const hashedPassword = users[userID].password;
     if (bcrypt.compareSync(inputPassword, hashedPassword)) {
@@ -129,10 +131,10 @@ app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
   if (checkEmptyFields(email, password)) {
-      res.status(400).send('Email or password not entered');
-      return;
+    res.status(400).send('Email or password not entered');
+    return;
   }
-  if (userByEmail(email, users)) {
+  if (getUserByEmail(email, users)) {
     res.status(400).send('Existing account with that email');
     return;
   }
@@ -146,7 +148,7 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-function urlsForUser(id) {
+const urlsForUser = function(id) {
   let userURLS = {};
   for (const url in urlDatabase) {
     if (urlDatabase[url].userID === id) {
@@ -154,33 +156,25 @@ function urlsForUser(id) {
     }
   }
   return userURLS;
-}
+};
 
-function userByEmail(email, database) {
-  for (const user in users) {
-    if (database[user].email === email) {
-      return user;
-    }
-  }
-}
-
-function checkEmptyFields(email, password) {
+const checkEmptyFields = function(email, password) {
   if (!email || !password) {
     return true;
   }
   return false;
-}
+};
 
-function urlChecker(url) {
+const urlChecker = function(url) {
   if (!url.includes('http://') && !url.includes('www')) {
     url = `http://www.${url}`;
   } else if (! url.includes('http://') && url.includes('www')) {
     url = `http://${url}`;
   }
   return url;
-}
+};
 
-function generateRandomString() {
+const generateRandomString = function() {
   const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let result = '';
   let count = 0;
@@ -189,4 +183,4 @@ function generateRandomString() {
     count++;
   }
   return result;
-}
+};
