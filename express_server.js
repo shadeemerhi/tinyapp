@@ -1,11 +1,11 @@
-const express = require("express");
+const express = require('express');
 const dotenv = require('dotenv');
 dotenv.config();
 const app = express();
 const { getUserByEmail } = require('./helpers');
 
 // Middleware
-const bodyParser = require("body-parser");
+const bodyParser = require('body-parser');
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
