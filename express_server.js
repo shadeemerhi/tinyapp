@@ -4,6 +4,7 @@ const PORT = 8080;
 
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser');
+const bcrypt = require('bcrypt');
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 
@@ -87,10 +88,11 @@ app.post('/urls/:shortURL', (req, res) => {
 
 app.post('/login', (req, res) => {
   const email = req.body.email;
-  const password = req.body.password;
+  const inputPassword = req.body.password;
   let userID = userByEmail(email);
   if (userID) {
-    if (users[userID].password === password) {
+    const hashedPassword = users[userID].password;
+    if (bcrypt.compareSync(inputPassword, hashedPassword)) {
       res.cookie('user_id', userID);
       res.redirect('/urls');
     } else {
@@ -119,7 +121,7 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
-  const password = req.body.password;
+  const password = bcrypt.hashSync(req.body.password, 10);
   if (checkEmptyFields(email, password)) {
       res.status(400).send('Email or password not entered');
       return;
