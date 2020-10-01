@@ -1,3 +1,4 @@
+// Requiring all necessary packages and modules
 const express = require('express');
 const dotenv = require('dotenv');
 dotenv.config();
@@ -14,8 +15,11 @@ app.use(cookieSession({
   name: 'session',
   keys: [myKey],
 }));
+
+// Indicating to Express that we are using the EJS view engine
 app.set('view engine', 'ejs');
 
+// Setting up the port for express
 const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
@@ -25,17 +29,33 @@ app.listen(PORT, () => {
 const urlDatabase = {};
 const users = {};
 
+app.get('/', (req, res) => {
+// If a user is logged in, they are redirected to their url's
+  if (req.session.user_id) {
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
+});
+
 app.get('/urls', (req, res) => {
+  let user = users[req.session.user_id];
+  // If a user is not logged in, they are redirected to the homepage
+  if (!user) {
+    req.session = null;
+    res.redirect('/login');
+  }
   const userURLS = urlsForUser(req.session.user_id);
   let templateVars = {
-    user: users[req.session.user_id],
+    user,
     urls: userURLS
   };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
-  if (!req.session.user_id) {
+  let user = users[req.session.user_id];
+  if (!user) {
     res.redirect('/login');
   }
   const templateVars = {
@@ -45,6 +65,17 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  let user = req.session.user_id;
+  // If a user is not logged in, they are redirected to the homepage
+  if (!user || !urlDatabase[shortURL]) {
+    req.session = null;
+    res.redirect('/login');
+  }
+  // If the current session userID does not match the userID of the creator of the URL
+  if (req.session.user_id !== urlDatabase[shortURL].userID) {
+    res.status(403).send('You are not authorized to view this URL');
+  }
   const templateVars = {
     user: users[req.session.user_id],
     shortURL: req.params.shortURL,
@@ -79,14 +110,21 @@ app.get('/u/:shortURL', (req, res) => {
 
 app.post('/urls/:shortURL/delete', (req, res) => {
   const shortURL = req.params.shortURL;
-  if (req.session.user_id) {
+  if (req.session.user_id && req.session.user_id === urlDatabase[shortURL].userID) {
     delete urlDatabase[shortURL];
   }
   res.redirect('/urls');
 });
 
 app.post('/urls/:shortURL', (req, res) => {
+  // If a user is not logged, or if is a user is logged in but the URL they're trying to edit is not theirs
+  if (!req.session.user_id) {
+    res.redirect('/login');
+  }
   const shortURL = req.params.shortURL;
+  if (req.session.user_id !== urlDatabase[shortURL].userID) {
+    res.status(403).send('You are not authorized to make changes to this URL');
+  }
   let longURL = urlChecker(req.body.longURL);
   if (req.session.user_id) {
     urlDatabase[shortURL].longURL = longURL;
@@ -130,7 +168,7 @@ app.post('/register', (req, res) => {
   const userID = generateRandomString();
   const email = req.body.email;
   const password = bcrypt.hashSync(req.body.password, 10);
-  if (checkEmptyFields(email, password)) {
+  if (checkEmptyFields(email, req.body.password)) {
     res.status(400).send('Email or password not entered');
     return;
   }
