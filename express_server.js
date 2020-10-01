@@ -95,7 +95,7 @@ app.post('/urls/:shortURL', (req, res) => {
 app.post('/login', (req, res) => {
   const email = req.body.email;
   const inputPassword = req.body.password;
-  let userID = userByEmail(email);
+  let userID = userByEmail(email, users);
   if (userID) {
     const hashedPassword = users[userID].password;
     if (bcrypt.compareSync(inputPassword, hashedPassword)) {
@@ -132,7 +132,7 @@ app.post('/register', (req, res) => {
       res.status(400).send('Email or password not entered');
       return;
   }
-  if (userByEmail(email)) {
+  if (userByEmail(email, users)) {
     res.status(400).send('Existing account with that email');
     return;
   }
@@ -156,13 +156,12 @@ function urlsForUser(id) {
   return userURLS;
 }
 
-function userByEmail(email) {
+function userByEmail(email, database) {
   for (const user in users) {
-    if (users[user].email === email) {
+    if (database[user].email === email) {
       return user;
     }
   }
-  return false;
 }
 
 function checkEmptyFields(email, password) {
