@@ -12,6 +12,15 @@
   <%- include('partials/_header'); %>
 </header>
 <body>
+  <% if (error) { %>
+    <div class="container text-center">
+      <div class="row text-center" style="background-color: #fa8780;">
+        <div class="col-12">
+          <h5 style="align-items: center;"><%= error %></h5>
+        </div>
+      </div>
+    </div>
+  <% } %>
   <main style="margin: 1em;">
     <h3>My URLs</h3>
     <table class="table">

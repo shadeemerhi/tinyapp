@@ -58,11 +58,13 @@ app.get('/urls', (req, res) => {
   // templateVars serves same purpose in subsequent routes
   let templateVars = {
     user,
-    urls: userURLS
+    urls: userURLS,
+    error: req.session.error
   };
 
   // Rendering the template for respective route
   // res.render() same purpose in subsequent routes
+  req.session.error = null;
   res.render('urls_index', templateVars);
 });
 
@@ -95,7 +97,8 @@ app.get('/urls/:shortURL', (req, res) => {
   }
   // If the current session userID does not match the userID of the creator of the URL, they are not authorized to view or edit it
   if (req.session.user_id !== urlDatabase[shortURL].userID) {
-    res.status(403).send('You are not authorized to view this URL');
+    req.session.error = 'You are not authorized to make changes to this URL';
+    res.redirect('/urls');
   }
   const templateVars = {
     user: users[req.session.user_id],
@@ -106,9 +109,13 @@ app.get('/urls/:shortURL', (req, res) => {
 });
 
 app.get('/login', (req, res) => {
+
+  // If a login error is present, it is passed to the template for rendering
   const templateVars = {
-    user: users[req.session.user_id]
+    user: users[req.session.user_id],
+    error: req.session.error
   };
+  req.session = null;
   res.render('login', templateVars);
 });
 
@@ -159,7 +166,8 @@ app.post('/urls/:shortURL', (req, res) => {
   }
   // If a user is logged in but their userID does not match the ID of the creator, they are not authorized to make edits
   if (req.session.user_id !== urlDatabase[shortURL].userID) {
-    res.status(403).send('You are not authorized to make changes to this URL');
+    req.session.error = 'You are not authorized to make changes to this URL';
+    res.redirect('/urls');
   }
 
   // Checking and adjusting (if needed) the long URL given by the user
@@ -185,12 +193,16 @@ app.post('/login', (req, res) => {
       req.session.user_id = userID;
       res.redirect('/urls');
     } else {
-      res.status(403).send('Incorrect Password');
-      return;
+      req.session.error = 'Incorrect Password'
+      res.redirect('/login');
+      // res.status(403).send('Incorrect Password');
+      // return;
     }
   } else {
-    res.status(403).send('An account with that email does not exist');
-    return;
+    req.session.error = 'No account found with that email'
+    res.redirect('/login');
+    // res.status(403).send('An account with that email does not exist');
+    // return;
   }
 });
 
@@ -201,10 +213,14 @@ app.post('/logout', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
+
+  // If a login error is present, it is passed to the template for rendering
   let templateVars = {
     user: users[req.session.user_id],
-    urls: urlDatabase
+    urls: urlDatabase,
+    error: req.session.error
   };
+  req.session = null;
   res.render('register', templateVars);
 });
 
@@ -216,13 +232,13 @@ app.post('/register', (req, res) => {
 
   // Checking if the provided credentials are empty
   if (checkEmptyFields(email, req.body.password)) {
-    res.status(400).send('Email or password not entered');
-    return;
+    req.session.error = 'Email or password not entered';
+    res.redirect('/register');
   }
   // If there is already an account with the provided email, an appropriate message is displayed
   if (getUserByEmail(email, users)) {
-    res.status(400).send('Existing account with that email');
-    return;
+    req.session.error = 'Existing account with that email';
+    res.redirect('/register');
   }
 
   // Creating the new user object once the inputs have been checked and the password has been hashed
