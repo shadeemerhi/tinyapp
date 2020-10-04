@@ -23,4 +23,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ## Getting Started
 
 - Install all dependencies (using the `npm install` command).
+- Create a .env file and store all cookieSession keys as variables.
+  - In express_server.js, store the key(s) in variable(s) (i.e. `const keyKey = process.env.myKey`).
+  - Use the key(s) in the cookieSession object when configuring Express (`app.use(cookieSession({name: 'session', keys: [myKey]}))`
 - Run the development web server using the `node express_server.js` command.
